@@ -9,7 +9,7 @@
 #include <limits>
 #include <span>
 #include <type_traits>
-
+#include <cmath>
 
 #define GCC_COMPILER (defined(__GNUC__) && !defined(__clang__))
 #define CLANG_COMPILER (!defined(__GNUC__) && defined(__clang__))
@@ -89,7 +89,7 @@ namespace Array {
         bool is_view = false;
 
     public:
-        Array(): size(0), shape({}), buffer(nullptr) {}; // Default constructor
+        Array(): size(0), shape({}), buffer(nullptr), strides({}) {}; // Default constructor
 
         // Constructor for a new array
         template<class... Dims>
@@ -156,18 +156,17 @@ namespace Array {
         }
 
         template <size_t array_size>
-        Array& View (std::span<size_t, array_size> dims) {
+        Array<T, D - array_size> View (int const (& dims) [array_size]) {
             if (array_size >= D) {
                 io::ArrayExit("View dimensions must be less than the number of dimensions of the array");
+            }
+            if (array_size == 0) {
+                io::ArrayExit("Must have at least one dimension selected for a view");
             }
             Array<T, D - array_size> output;
 
 
-            return *output;
-        }
-
-        Array&  View (std::initializer_list<size_t> dims) {
-            View(std::span{dims.begin(), dims.size()});
+            return (output);
         }
 
         template<typename BufferType>
